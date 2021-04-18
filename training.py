@@ -1,8 +1,6 @@
-import numpy as np
 import torch
 from torch import nn
 import argparse
-import os
 import sys
 from torch.utils.data import DataLoader
 import torch.optim as optim
@@ -78,7 +76,7 @@ def main():
         "--n_classes",
         type=int,
         default=2,
-        help="number of claesses",
+        help="number of classes",
     )
 
     parser.add_argument(
