@@ -1,5 +1,7 @@
+from typing import List
 import pandas as pd
 import numpy as np
+from PIL import Image
 import os
 import glob
 from tqdm import tqdm
@@ -7,6 +9,24 @@ import argparse
 from utils.util import tiling
 
 np.random.seed(4)
+
+
+def get_image_names(folder_name: str) -> List[str]:
+    return [os.path.splitext(name)[0] for name in os.listdir(folder_name) if
+            os.path.isfile(os.path.join(folder_name, name))]
+
+
+def create_empty_png_file(dir_path: str, filename: str, width: int, height: int):
+    """
+    Create empty png file with spec widht and height
+    :param dir_path:
+    :param filename:
+    :param width:
+    :param height:
+    :return:
+    """
+    image = Image.new('RGB', (width, height))
+    image.save(os.path.join(dir_path, f"{filename}.png"), "PNG")
 
 
 def main():
@@ -42,6 +62,13 @@ def main():
     )
 
     args = parser.parse_args()
+
+    image_filename_list = get_image_names(args.image_dir)
+    label_filename_list = get_image_names(args.label_dir)
+    # Checking missing label in case of good sling (in other words sling without defects)
+    missing_label_set = set(image_filename_list) - set(label_filename_list)
+    if missing_label_set:
+        [create_empty_png_file(args.label_dir, filename, 5208, 3476) for filename in missing_label_set]
 
     # Create numpy array to sort test and train images
     label = np.asarray(sorted(glob.glob(args.label_dir + '/*.png')))
