@@ -2,14 +2,14 @@ import numpy as np
 import torch
 
 
-def get_metrics_values(imLab, imPred, numClass):
+def get_metrics_values(im_lab, im_pred, num_class):
     """
     Function used to get intersection and union value
 
     Parameters:
 
-        imLab (torch.Tensor): Ground truth label
-        imPred (torch.Tensor): Prediction of the model
+        im_lab (torch.Tensor): Ground truth label
+        im_pred (torch.Tensor): Prediction of the model
         num_class (int): number of classes
 
     Returns:
@@ -18,9 +18,9 @@ def get_metrics_values(imLab, imPred, numClass):
 
     """
 
-    imLab = imLab.detach().cpu().numpy()
-    imPred = torch.argmax(imPred[0], dim=1).detach().cpu().numpy()
-    inte, uni = intersectionAndUnion(imLab, imPred, numClass)
+    im_lab = im_lab.detach().cpu().numpy()
+    im_pred = torch.argmax(im_pred[0], dim=1).detach().cpu().numpy()
+    inte, uni = intersectionAndUnion(im_lab, im_pred, num_class)
     return inte + 1e-9, uni + 1e-9
 
 
