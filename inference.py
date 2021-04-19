@@ -1,4 +1,4 @@
-# test/inference script
+import os
 import numpy as np
 import torch
 import argparse
@@ -71,9 +71,9 @@ def main():
     tile_size = (869, 1302)
     offset = (869, 1302)
 
-    for image_path in tqdm(os.listdir(args.path_to_images)):
+    for image_name in tqdm(os.listdir(args.path_to_images)):
 
-        path = os.path.join(args.path_to_images, image_path)
+        path = os.path.join(args.path_to_images, image_name)
         img = cv2.imread(path)
         data = path.split("/")
         os.makedirs(os.path.join(args.output_dir, "tiling_output"), exist_ok=True)
@@ -146,12 +146,15 @@ def main():
 
         error = (np.sum(prediction) / (img_shape[0] * img_shape[1])) * 100
 
-        print("Percentage of damage in {} is {:.3f}%".format(image_path, error))
+        print("\n\nPercentage of damage in {} is {:.3f}%".format(image_name, error))
 
         shutil.rmtree(os.path.join(args.output_dir, "tiling_output"))
 
+        # добавляем процент повреждений в название выходного файла
+        filename, file_extension = os.path.splitext(image_name)
+        image_name = "{}_Perc_{:.3f}%{}".format(filename, error, file_extension)
         cv2.imwrite(
-            os.path.join(args.output_dir, "pred_mask", image_path), prediction * 255
+            os.path.join(args.output_dir, "pred_mask", image_name), prediction * 255
         )
 
 
