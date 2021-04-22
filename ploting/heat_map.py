@@ -69,3 +69,4 @@ class HeatMap:
                     bbox_inches='tight',
                     pad_inches=0, **kwargs)
         print('{}.{} has been successfully saved to {}'.format(filename, format, save_path))
+        plt.clf()
