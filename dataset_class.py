@@ -9,7 +9,7 @@ import random
 import matplotlib.pyplot as plt
 
 
-class classDataset(Dataset):
+class DatasetClass(Dataset):
     def __init__(self, csvpath, mode, height, width, mean_std, debug=False):
         """      
         Constructor of Dataset 

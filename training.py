@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 from utils.util import *
 import torch.nn.functional as F
-from datasetcClass import classDataset
+from dataset_class import DatasetClass
 from models.hrnet import hrnet
 from evaluation import validate_model
 
@@ -114,7 +114,7 @@ def main():
     mean_std = ([0.68577555, 0.65262334, 0.59697408],
                 [0.12157939, 0.1254269, 0.13619352])
 
-    train_object = classDataset(
+    train_object = DatasetClass(
         args.csvpath, 'train', args.height, args.width, mean_std)
     train_loader = DataLoader(
         train_object,
@@ -125,7 +125,7 @@ def main():
 
     valid_loader = None
     if validate:
-        valid_object = classDataset(
+        valid_object = DatasetClass(
             args.csvpath, 'valid', args.height, args.width, mean_std)
         valid_loader = DataLoader(
             valid_object,
@@ -142,7 +142,7 @@ def main():
         model.cuda()
 
     start_epoch = 1
-    n_epochs = 500
+    n_epochs = 100
     for epoch in range(start_epoch, n_epochs + 1):
         train(epoch, n_epochs, model, train_loader, criterion, optimizer)
         if validate:
