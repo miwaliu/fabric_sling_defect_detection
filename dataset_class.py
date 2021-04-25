@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 
 class DatasetClass(Dataset):
     def __init__(self, csvpath, mode, height, width, mean_std, debug=False):
-        """      
-        Constructor of Dataset 
+        """
+        Constructor of Dataset
         Format of csv file:
         It contains 2 columns
         1. Path to image
@@ -22,16 +22,16 @@ class DatasetClass(Dataset):
             csvpath (str): Path to the csv file Ex. dataset/steel
             mode (str): Mode of the dataset {'train', 'valid'}
             height (int): height of the image
-            width (int): width of the image 
-            mean_std (List,List): mean and std of the dataset 
+            width (int): width of the image
+            mean_std (List,List): mean and std of the dataset
             debug (bool): True to show some sample
 
         """
 
         self.csv_file = (
             pd.read_csv(os.path.join(csvpath, mode + ".csv"))
-            .iloc[:, :]
-            .values
+                .iloc[:, :]
+                .values
         )
         self.mean_std = mean_std
         self.height = height
@@ -57,10 +57,10 @@ class DatasetClass(Dataset):
 
     def __getitem__(self, idx):
         """
-        Function used by dataloader to get item contain augmentation, normalization function 
+        Function used by dataloader to get item contain augmentation, normalization function
 
         Parameters:
-            idx (int): index of the csv file 
+            idx (int): index of the csv file
 
         """
         image = cv2.imread(self.csv_file[idx, 0], cv2.IMREAD_COLOR)
@@ -70,10 +70,10 @@ class DatasetClass(Dataset):
         label[label == 100] = 1
 
         if (
-            image.shape[1] == self.width
-            and image.shape[0] == self.height
-            and label.shape[1] == self.width
-            and label.shape[0] == self.height
+                image.shape[1] == self.width
+                and image.shape[0] == self.height
+                and label.shape[1] == self.width
+                and label.shape[0] == self.height
         ):
             pass
         else:
@@ -88,10 +88,11 @@ class DatasetClass(Dataset):
 
         if self.mode == 'train':
             image, label = self.rand_crop(
-                image, label, crop_size=(image.shape[0]//2, image.shape[1]//2))
+                image, label, crop_size=(image.shape[0] // 2, image.shape[1] // 2))
 
         if self.debug:
             self.show_sample(image, label)
+
         transformation = transforms.Compose(
             [transforms.ToPILImage(), transforms.ToTensor()])
 
@@ -102,15 +103,15 @@ class DatasetClass(Dataset):
         if self.mode == 'train':
             # applying transforms
             augment = [
-                transforms.RandomCrop(200),
                 transforms.RandomHorizontalFlip(0.5)
             ]
             tfs = transforms.Compose(augment)
             # seed = random.randint(0, 2**32)
             # self._set_seed(seed)
             image = tfs(image)
-            # self._set_seed(seed)
             label = tfs(label)
+
+            # self._set_seed(seed)
 
         sample = {
             "image": image,
@@ -156,10 +157,10 @@ class DatasetClass(Dataset):
 
         Parameters:
             image (np.ndarray): image
-            h (int): height of the original image 
-            w (int): width of the original image 
+            h (int): height of the original image
+            w (int): width of the original image
             crop_size (tuple): size of the crop image (height,width)
-            padvalue (tuple) : Pading value 
+            padvalue (tuple) : Pading value
 
         Returns:
             image (np.ndarray): Padded image
@@ -176,7 +177,7 @@ class DatasetClass(Dataset):
 
     def show_sample(self, image, label):
         """
-        Show sample of the dataset 
+        Show sample of the dataset
 
         Parameters:
             image (np.ndarray): image
@@ -184,7 +185,7 @@ class DatasetClass(Dataset):
 
         """
 
-        plt.imshow(image)
-        plt.show()
         plt.imshow(label)
+        plt.show()
+        plt.imshow(image)
         plt.show()

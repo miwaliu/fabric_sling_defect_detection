@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import join, splitext
 
-from ploting.heat_map import HeatMap
+from utils.ploting.heat_map import HeatMap
 from numpy import asarray
 from PIL import Image
 
