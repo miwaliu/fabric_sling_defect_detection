@@ -1,83 +1,85 @@
+import os
+import random
+from typing import Tuple, List
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-import cv2
-import pandas as pd
-import numpy as np
-import os
-import random
-import matplotlib.pyplot as plt
 
 
 class DatasetClass(Dataset):
-    def __init__(self, csvpath, mode, height, width, mean_std, debug=False):
+    """
+    Класс для работы с данными из csv файла
+    """
+
+    def __init__(self,
+                 csvpath: str,
+                 mode: str,
+                 height: int,
+                 width: int,
+                 mean_std: Tuple[List, List],
+                 debug: bool = False):
         """
-        Constructor of Dataset
-        Format of csv file:
-        It contains 2 columns
-        1. Path to image
-        2. Path to mask
+        Конструктор класса датасет
+        Формат csv файла должен быть следующим:
+        Содержит 2 поля
+        1. Путь к оригинальному изображению
+        2. Путь к соотвествующей маске
 
-        Parameters:
-            csvpath (str): Path to the csv file Ex. dataset/steel
-            mode (str): Mode of the dataset {'train', 'valid'}
-            height (int): height of the image
-            width (int): width of the image
-            mean_std (List,List): mean and std of the dataset
-            debug (bool): True to show some sample
-
+        :param  csvpath (str): путь к csv файлу
+        :param  mode (str): режим работы. Принимает любое из 2 значений {'train', 'valid'}
+        :param  height (int): высота изображения
+        :param  width (int): ширина изображения
+        :param  mean_std (List,List): средние и дисперсия датасета
+        :param  debug (bool): режим отладки
+        :return:
         """
 
-        self.csv_file = (
-            pd.read_csv(os.path.join(csvpath, mode + ".csv"))
-                .iloc[:, :]
-                .values
-        )
+        self.csv_file = (pd.read_csv(os.path.join(csvpath, mode + ".csv")).iloc[:, :].values)
         self.mean_std = mean_std
         self.height = height
         self.width = width
         self.mode = mode
         self.debug = debug
 
-    def _set_seed(self, seed):
+    def _set_seed(self, seed: int):
         """
-        Function used to set seed
+        Функция установки сида
 
-        Parameters:
-            seed (int): seed
-
+        :param seed (int): seed
+        :return:
         """
 
         random.seed(seed)
         torch.manual_seed(seed)
 
     def __len__(self):
-        """returns length of CSV file"""
+        """Возвращает длинну csv файла"""
         return len(self.csv_file)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> dict:
         """
-        Function used by dataloader to get item contain augmentation, normalization function
+        Функция, используемая загрузчиком данных для получения элемента, содержащего функцию аугментации и нормализации
 
-        Parameters:
-            idx (int): index of the csv file
-
+        :param idx (int): индекс в csv файле
+        :return: словарь из исходного изображения и соотвествующим ему названием файла и его маской
         """
         image = cv2.imread(self.csv_file[idx, 0], cv2.IMREAD_COLOR)
-        # print(self.csv_file[idx, 1])
         label = (cv2.imread(
             self.csv_file[idx, 1], cv2.IMREAD_GRAYSCALE))
         label[label == 100] = 1
 
-        if (
+        # если размер изображения не подходит под фомат, то принудительно ресайзим изображение
+        if not (
                 image.shape[1] == self.width
                 and image.shape[0] == self.height
                 and label.shape[1] == self.width
                 and label.shape[0] == self.height
         ):
-            pass
-        else:
-
             image = cv2.resize(
                 image, (self.width, self.height))
             label = cv2.resize(
@@ -101,17 +103,12 @@ class DatasetClass(Dataset):
         label = torch.from_numpy(label)
 
         if self.mode == 'train':
-            # applying transforms
             augment = [
                 transforms.RandomHorizontalFlip(0.5)
             ]
             tfs = transforms.Compose(augment)
-            # seed = random.randint(0, 2**32)
-            # self._set_seed(seed)
             image = tfs(image)
             label = tfs(label)
-
-            # self._set_seed(seed)
 
         sample = {
             "image": image,
@@ -121,23 +118,21 @@ class DatasetClass(Dataset):
 
         return sample
 
-    def rand_crop(self, image, label, crop_size):
+    def rand_crop(self,
+                  image: np.ndarray,
+                  label: np.ndarray,
+                  crop_size: Tuple[int, int]) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Spatial augmentation technique: Crop the part of the image
+        Функция аугментации случайного кропом
 
-        Parameters:
-            image (np.ndarray): image
-            label (np.ndarray): label
-            crop_size (tuple) : (height//2,width//2) of the original image
-
-        Returns:
-            image (np.ndarray): Cropped image
-            label (np.ndarray): Cropped label
-
+        :param image (np.ndarray): массив пикселей представляющих исходное изображение
+        :param label (np.ndarray): массив пикселей представляющих ground true маску
+        :param crop_size (tuple) : размер кропа. Обычно равен (height//2,width//2)  оригинального изображения
+        :return: кортеж из покропленного изображения и соотвествующией ему маски
         """
 
-        h, w = image.shape[:-1]
-        image = self.pad_image(image, h, w, crop_size, (0.0, 0.0, 0.0))
+        height, weigth = image.shape[:-1]
+        image = self._pad_image(image, height, weigth, crop_size, (0.0, 0.0, 0.0))
 
         new_h, new_w = image.shape[:-1]
         x = random.randint(0, new_w - crop_size[1])
@@ -146,43 +141,46 @@ class DatasetClass(Dataset):
         image = image[y: y + crop_size[0], x: x + crop_size[1]]
 
         if label is not None:
-            label = self.pad_image(
-                label, h, w, crop_size, (255,))
+            label = self._pad_image(
+                label, height, weigth, crop_size, (255,))
             label = label[y: y + crop_size[0], x: x + crop_size[1]]
         return image, label
 
-    def pad_image(self, image, h, w, size, padvalue):
+    @classmethod
+    def _pad_image(cls,
+                   image: np.ndarray,
+                   height: int,
+                   weight: int,
+                   crop_size: Tuple[int, int],
+                   padvalue) -> np.ndarray:
         """
-        Spatial augmentation technique: Crop the part of the image
+        Функция заполнения кроп изображения
 
-        Parameters:
-            image (np.ndarray): image
-            h (int): height of the original image
-            w (int): width of the original image
-            crop_size (tuple): size of the crop image (height,width)
-            padvalue (tuple) : Pading value
-
-        Returns:
-            image (np.ndarray): Padded image
-
+        :param image (np.ndarray): массив пикселей представляющих исходное изображение
+        :param height (int): height of the original image
+        :param weight (int): width of the original image
+        :param crop_size (tuple) : размер кропа. Обычно равен (height//2,width//2)  оригинального изображения
+        :param padvalue (tuple) : значение заполнитель
+        :return: изображение после заполнения
         """
+
         pad_image = image.copy()
-        pad_h = max(size[0] - h, 0)
-        pad_w = max(size[1] - w, 0)
+        pad_h = max(crop_size[0] - height, 0)
+        pad_w = max(crop_size[1] - weight, 0)
         if pad_h > 0 or pad_w > 0:
             pad_image = cv2.copyMakeBorder(
                 image, 0, pad_h, 0, pad_w, cv2.BORDER_CONSTANT, value=padvalue
             )
         return pad_image
 
-    def show_sample(self, image, label):
+    @classmethod
+    def show_sample(cls, image: np.ndarray, label: np.ndarray):
         """
-        Show sample of the dataset
+        Функция рисования изображения и маски
 
-        Parameters:
-            image (np.ndarray): image
-            label (np.ndarray): label
-
+        :param image (np.ndarray): массив пикселей представляющих исходное изображение
+        :param label (np.ndarray): массив пикселей представляющих ground true маску
+        :return:
         """
 
         plt.imshow(label)
