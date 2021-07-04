@@ -41,7 +41,6 @@ def main():
         default="./",
         help="Путь, по которому расположены все тестовые изображения",
     )
-
     parser.add_argument(
         "--path_to_weights",
         type=str,
@@ -49,14 +48,12 @@ def main():
         default="./",
         help="Путь к весам",
     )
-
     parser.add_argument(
         "--output_dir",
         type=str,
         default="./",
         help="Путь для вывода результата работы",
     )
-
     parser.add_argument("--n_classes", type=int, default="2", help="Количество классов")
 
     args = parser.parse_args()
@@ -125,16 +122,7 @@ def main():
                 )
 
                 cv2.imwrite(
-                    args.output_dir
-                    + "/tiling_output/"
-                    + data[-1][:-4]
-                    + "_"
-                    + str(i)
-                    + "_"
-                    + str(j)
-                    + data[-1][-4:],
-                    prediction,
-                )
+                    f"{args.output_dir}/tiling_output/{data[-1][:-4]}_{str(i)}_{str(j)}{data[-1][-4:]}{prediction}")
 
         prediction = stiching(
             os.path.join(args.output_dir, "tiling_output"),
