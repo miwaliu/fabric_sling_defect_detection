@@ -178,8 +178,8 @@ class DatasetClass(Dataset):
         """
         Функция рисования изображения и маски
 
-        :param image (np.ndarray): массив пикселей представляющих исходное изображение
-        :param label (np.ndarray): массив пикселей представляющих ground true маску
+        :param image: массив пикселей представляющих исходное изображение
+        :param label: массив пикселей представляющих ground true маску
         :return:
         """
 

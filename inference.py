@@ -1,25 +1,25 @@
-import os
-import numpy as np
-import torch
 import argparse
-import os
-import cv2
-from models.hrnet import hrnet
-from tqdm import tqdm
-from torchvision import transforms
 import math
-from utils.util import stiching
+import os
 import shutil
 
+import cv2
+import numpy as np
+import torch
+from torchvision import transforms
+from tqdm import tqdm
 
-def preprocess_image(image):
-    """[code to normalize and convert image to torch tensor]
+from constants import TILE_SIZE
+from models.string_model import string_model
+from utils.util import stiching
 
-    Args:
-        image ([numpy array]): [image read by opencv]
 
-    Returns:
-        [type]: [normalized torch tensor 4d]
+def preprocess_image(image: np.ndarray):
+    """
+    Функция нормализации и конвертирования изображения в PyTorch тензор
+
+    :param image (np.ndarray): массив пикселей представляющих исходное изображение
+    :return: нормализованный PyTorch тензор
     """
     transformation = transforms.Compose(
         [transforms.ToPILImage(), transforms.ToTensor()]
@@ -39,7 +39,7 @@ def main():
         type=str,
         required=True,
         default="./",
-        help="Path where all the test images are located or you can give path to video, it will break into each frame and write as a video",
+        help="Путь, по которому расположены все тестовые изображения",
     )
 
     parser.add_argument(
@@ -47,29 +47,29 @@ def main():
         type=str,
         required=True,
         default="./",
-        help="Path to weights for which inference needs to be done",
+        help="Путь к весам",
     )
 
     parser.add_argument(
         "--output_dir",
         type=str,
         default="./",
-        help="Path to save checkpoints and wandb, final output path will be this path + wandbexperiment name so the output_dir should be root directory",
+        help="Путь для вывода результата работы",
     )
 
-    parser.add_argument("--n_classes", type=int, default="2", help="number of classes")
+    parser.add_argument("--n_classes", type=int, default="2", help="Количество классов")
 
     args = parser.parse_args()
 
-    model = hrnet(n_classes=args.n_classes)
+    model = string_model(n_classes=args.n_classes)
     if torch.cuda.is_available():
         model.cuda()
     model.load_state_dict(torch.load(args.path_to_weights)["state_dict"])
     model.eval()
 
     os.makedirs(os.path.join(args.output_dir, "pred_mask"), exist_ok=True)
-    tile_size = (869, 1302)
-    offset = (869, 1302)
+    tile_size = TILE_SIZE
+    offset = TILE_SIZE
 
     for image_name in tqdm(os.listdir(args.path_to_images)):
 
@@ -82,6 +82,7 @@ def main():
         for i in range(int(math.ceil(img_shape[0] / (offset[0] * 1.0)))):
             for j in range(int(math.ceil(img_shape[1] / (offset[1] * 1.0)))):
 
+                # делам кроп изображения
                 cropped_img = img[
                               offset[0] * i: min(offset[0] * i + tile_size[0], img_shape[0]),
                               offset[1] * j: min(offset[1] * j + tile_size[1], img_shape[1]),
@@ -121,7 +122,6 @@ def main():
                         .squeeze(dim=0)
                         .numpy()
                         .astype(np.uint8)
-                    # * 255
                 )
 
                 cv2.imwrite(
@@ -160,5 +160,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# python inference.py --path_to_images dataset/steel/image --path_to_weights weigths/hrnetv2_hrnet18_steel_dataset_47.pth --output_dir output
