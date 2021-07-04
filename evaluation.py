@@ -1,30 +1,27 @@
-from utils.util import AverageMeter
-from utils.metrics import get_metrics_values
+import os
+import sys
+
+import numpy as np
 import torch
 import torch.nn.functional as F
-import sys
-import numpy as np
-import os
+
+from utils.metrics import get_metrics_values
+from utils.util import AverageMeter
 
 
 def validate_model(
-    epoch, model, data_loader, criterion, best_val_iou, n_classes, output_dir
-):
+        epoch: int, model, data_loader, criterion, best_val_iou: float, n_classes: int, output_dir: str):
     """
-    Validate model using Intersection over Union score
+    Валидацця модели
 
-    Parameters:
-        epoch (int): Current running epoch
-        model: Model
-        data_loader: Pytorch DataLoader
-        criterion: Loss function
-        best_val_iou (float): Current best value of IoU
-        n_classes (int): Number of classes
-        output_dir (str): Path to save weights
-
-    Returns:
-        float: Validation score
-
+    :param epoch (int): номер текущей эпохи
+    :param model: Модель
+    :param data_loader: Pytorch DataLoader
+    :param criterion: Функция потерь
+    :param best_val_iou (float): Текущее лучшее значение параметра ntersection over Union
+    :param n_classes (int): Колличество классов
+    :param output_dir (str): Путь по которому будут сохранены веса
+    :return: Значение параметра Intersection over Union
     """
 
     model.eval()
@@ -42,8 +39,8 @@ def validate_model(
 
             outputs = model(inputs, (targets.shape[1], targets.shape[2]))["output"]
             if (
-                outputs.shape[1] != targets.shape[1]
-                or outputs.shape[2] != targets.shape[2]
+                    outputs.shape[1] != targets.shape[1]
+                    or outputs.shape[2] != targets.shape[2]
             ):
                 outputs = F.upsample(
                     input=outputs,
@@ -70,9 +67,9 @@ def validate_model(
             {"state_dict": model.state_dict(), "iou": np.mean(iou), "epoch": epoch},
             os.path.join(output_dir, "best.pth"),
         )
-    print("")
+
     for i, _iou in enumerate(iou):
-        print("class [{}], IoU: {:.4f}".format(i, _iou))
+        print("\nclass [{}], IoU: {:.4f}".format(i, _iou))
 
     print("Epoch Loss", losses.avg, "Validation_meanIou", np.mean(iou))
     return best_val_iou
