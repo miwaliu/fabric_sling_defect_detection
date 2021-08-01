@@ -10,7 +10,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from constants import TILE_SIZE
-from models.string_model import string_model
+from models.sling_model import sling_model
 from utils.util import stiching
 
 

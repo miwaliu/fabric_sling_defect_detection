@@ -7,7 +7,7 @@ import torch.optim as optim
 from utils.util import *
 import torch.nn.functional as F
 from dataset_class import DatasetClass
-from models.hrnet import hrnet
+from models.sling_model import sling_model
 from evaluation import validate_model
 
 
