@@ -134,7 +134,7 @@ def main():
             num_workers=args.n_workers,
         )
 
-    model = hrnet(args.n_classes)
+    model = sling_model(args.n_classes)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=5e-3)
     best_val_iou = 0

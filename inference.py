@@ -58,7 +58,7 @@ def main():
 
     args = parser.parse_args()
 
-    model = string_model(n_classes=args.n_classes)
+    model = sling_model(n_classes=args.n_classes)
     if torch.cuda.is_available():
         model.cuda()
     model.load_state_dict(torch.load(args.path_to_weights)["state_dict"])
