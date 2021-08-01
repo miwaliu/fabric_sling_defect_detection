@@ -1,1 +1,4 @@
 dataset/
+.mypy_cache/
+.idea/
+venv/
