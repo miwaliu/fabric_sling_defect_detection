@@ -10,7 +10,7 @@ def plot_heatmap_data(path_to_orig_image):
     for image_file in listdir(path_to_orig_image):
         image_name, _ = splitext(image_file)
 
-        path_to_mask_image = join(path_to_orig_image, '..', 'pred_mask')
+        path_to_mask_image = join(path_to_orig_image, '../..', 'pred_mask')
         mask_filename = \
             [join(path_to_mask_image, image) for image in listdir(path_to_mask_image) if image_name in image][0]
 
@@ -21,5 +21,5 @@ def plot_heatmap_data(path_to_orig_image):
                 hm.save(image_name,
                         transparency=0.5,
                         format='jpg',
-                        save_path='heatmap_data',
+                        save_path='../../scripts/heatmap_data',
                         color_map='jet')

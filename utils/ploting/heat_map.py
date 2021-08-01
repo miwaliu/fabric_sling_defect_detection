@@ -20,7 +20,7 @@ class HeatMap:
             self.image = image
 
         # Convert numpy heat_map values into image formate for easy upscale
-        # Rezie the heat_map to the size of the input image
+        # Resize the heat_map to the size of the input image
         # Apply the gausian filter for smoothing
         # Convert back to numpy
         heatmap_image = Image.fromarray(heat_map)
