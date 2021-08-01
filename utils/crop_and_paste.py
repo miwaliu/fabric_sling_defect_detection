@@ -1,14 +1,10 @@
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import numpy as np
 import cv2
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def _overlay_image_alpha(img, img_overlay, x, y, alpha_mask):
-    """Overlay `img_overlay` onto `img` at (x, y) and blend using `alpha_mask`.
-
-    `alpha_mask` must have same HxW as `img_overlay` and values in range [0, 1].
-    """
     # Image ranges
     y1, y2 = max(0, y), min(img.shape[0], y + img_overlay.shape[0])
     x1, x2 = max(0, x), min(img.shape[1], x + img_overlay.shape[1])
@@ -42,8 +38,6 @@ def plot_image(img, figsize):
 
 
 def crop_and_paste(donor_image_path, donor_mask_path, target_image_path):
-    # https://stackoverflow.com/questions/62813546/how-do-i-crop-an-image-based-on-custom-mask-in-python
-
     # crop mask with defect
     donor_image = plt.imread(donor_image_path)
     target_image = plt.imread(target_image_path)
@@ -81,9 +75,3 @@ def crop_and_paste(donor_image_path, donor_mask_path, target_image_path):
     plot_image(donor_mask, figsize)
     plot_image(masked, figsize)
     plot_image(img_result, figsize)
-
-
-if __name__ == '__main__':
-    crop_and_paste(donor_image_path='IMG_0355.jpg',
-                   donor_mask_path='IMG_0355_Perc_2.691%.jpg',
-                   target_image_path='IMG_0331.jpg')
