@@ -41,8 +41,6 @@ def intersectionAndUnion(label, seg_pred, num_class, ignore=255):
     """
 
     size = (label.shape[1], label.shape[2])
-    #    seg_pred = pred.transpose(0, 2, 3, 1)
-    #    seg_pred = np.asarray(np.argmax(output, axis=3), dtype=np.uint8)
     seg_gt = np.asarray(label[:, : size[-2], : size[-1]], dtype=np.int)
     ignore_index = seg_gt != ignore
     seg_gt = seg_gt[ignore_index]
