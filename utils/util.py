@@ -1,7 +1,10 @@
 import math
-import numpy as np
-import cv2
 import os
+
+import cv2
+import numpy as np
+
+from constants import TILE_SIZE, TILLING_OFFSET_SIZE, STITCH_OFFSET_SIZE
 
 
 class AverageMeter(object):
@@ -41,7 +44,7 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def tiling(img_path, output_dir, tile_size=(869, 1302), offset=(782, 1172), preprocess=False, save=False):
+def tiling(img_path, output_dir, tile_size=TILE_SIZE, offset=TILLING_OFFSET_SIZE, preprocess=False, save=False):
     """
     Function used to tile image (split image) in order to increase training samples
 
@@ -62,10 +65,6 @@ def tiling(img_path, output_dir, tile_size=(869, 1302), offset=(782, 1172), prep
 
     img = cv2.imread(img_path)
     data = img_path.split('/')
-
-    if img.shape != ((3476, 5208, 3)):
-        img = cv2.resize(img, (5208, 3476))
-        cv2.imwrite(img_path, img)
 
     if preprocess:
         if not os.path.exists(output_dir):
@@ -99,10 +98,7 @@ def tiling(img_path, output_dir, tile_size=(869, 1302), offset=(782, 1172), prep
                 return cropped_img
 
 
-############################## Stiching ##############################################
-
-
-def stiching(img_dir, height, width, tile_size=(869, 1302), offset=(782, 1172)):
+def stiching(img_dir, height, width, tile_size=TILE_SIZE, offset=STITCH_OFFSET_SIZE):
     """
     Function used to stitch images
 
